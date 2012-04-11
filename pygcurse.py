@@ -1,26 +1,8 @@
 """
-Please forgive any typos or errors in the comments, I'll be cleaning them up as frequently as I can.
-
-
-Pygcurse v0.1 alpha
-
-Pygcurse (pronounced "pig curse") is a curses library emulator that runs on top of the Pygame framework. It provides an easy way to create text adventures, roguelikes, and console-style applications.
-
-Unfortunately, the curses library that comes with the Python standard library does not work on Windows. The excellent Console module from effbot provides curses-like features, but it only runs on Windows and not Mac/Linux. By using Pygame, Pygcurse is able to run on all platforms.
-
-Pygcurse provides several benefits over normal text-based stdio programs:
-
-    1) Color text and background.
-    2) The ability to move the cursor and print text anywhere in the console window.
-    3) The ability to make console apps that make use of the mouse.
-    4) The ability to have programs respond to individual key presses, instead of waiting for the user to type an entire string and press enter (as with input()/raw_input()).
-    5) Since the console window that Pygcurse uses is just a Pygame surface object, additional drawing and transformations can be applied to it. Multiple consoles can also be used in the same program.
-
-Pygcurse requires Pygame to be installed. Pygame can be downloaded from http://pygame.org
+This version editied and mainted by @B1naryth1ef
 
 Pygcurse was developed by Al Sweigart (al@inventwithpython.com)
 https://github.com/asweigart/pygcurse
-
 
 Simplified BSD License:
 
@@ -51,40 +33,8 @@ authors and should not be interpreted as representing official policies, either 
 or implied, of Al Sweigart.
 """
 
-import copy
-import time
-import sys
-import textwrap
-import pygame
+import copy, time, sys, textwrap, pygame
 from pygame.locals import *
-
-"""
-Some nomenclature in this module's comments explained:
-
-Cells:
-The space for each character is called a cell in this module. Cells are all of an identical size, which is based on the font being used. (only a single font of a single size can be used in a PygcurseSurface object. Cell coordinates refer to the positions of characters on the surface. Pixel coordinates refer to the position of each pixel.
-
-Scrolling:
-The term "scrolling" refers to when a character is printed at the bottom right corner, which causes all the characters on the surface to be moved up and a blank row to be created at the bottom. The print() and write() functions causes scolls if it prints enough characters. The putchar() and putchars() functions do not.
-
-Color parameters:
-Several Pygcurse functions take colors for their parameters. These can almost always (there might be some exceptions) be:
-    1) A pygame.Color object.
-    2) An RGB tuple of three integers, 0 to 255 (like Pygame uses)
-    3) An RGBA tuple of four integers, 0 to 255 (like Pygame uses)
-    4) A string such as 'blue', 'lime', or 'gray' (or any of the strings listed in the colornames gloal dictionary. This dict can be updated with more colors if the user wants.)
-    5) None, which means use whatever color the cell already uses.
-
-Region parameters:
-A "region" defines an area of the surface. It can be the following formats:
-    1) Four-integer tuple (x, y, width, height)
-    2) Four-integer tuple (x, y, None, None) which means x,y and extending to the right & bottom edge of the surface
-    3) None or (None, None, None, None) which means the entire surface
-    4) pygame.Rect object
-
-Note about flickering: If your program is experiencing a lot of flicker, than you should disable the self._autoupdate member. By default, this is enabled and the screen is redrawn after each method call that makes a change to the screen.
-"""
-
 
 DEFAULTFGCOLOR = pygame.Color(164, 164, 164, 255) # default foreground color is gray (must be a pygame.Color object)
 DEFAULTBGCOLOR = pygame.Color(0, 0, 0, 255) # default background color is black (must be a pygame.Color object)
@@ -122,16 +72,11 @@ colornames = {'white':   pygame.Color(255, 255, 255),
               'navy':    pygame.Color(  0,   0, 128),
               'black':   pygame.Color(  0,   0,   0)}
 
-
 class PygcurseSurface(object):
-
     """
     A PygcurseSurface object is the ascii-based analog of Pygame's Surface objects. It represents a 2D field of ascii characters, exactly like a console terminal. Each cell can have a different character, foreground color, background color, and RGB tint. The PygcurseSurface object also tracks the location of the cursor (where the print() and putchar() functions will output text) and the "input cursor" (the blinking cursor when the user is typing in characters.)
-
     Each xy position on the surface is called a "cell". A cell can hold one and only one character.
-
     The PygcurseSurface object contains a pygame.Surface object that it draws to. This pygame.Surface object in turn may have additional Pygame drawing functions called on it before being drawn to the screen with pygame.display.update().
-
     It should be noted that none of the code in the pygcurse module should at all be considered thread-safe.
     """
     _pygcurseClass = 'PygcurseSurface'
@@ -221,13 +166,10 @@ class PygcurseSurface(object):
         self._surfaceobj = pygame.Surface((self._pixelwidth, self._pixelheight))
         self._surfaceobj = self._surfaceobj.convert_alpha() # TODO - This is needed for erasing, but does this have a performance hit?
 
-
     def input(self, prompt='', x=None, y=None, maxlength=None, fgcolor=None, bgcolor=None, promptfgcolor=None, promptbgcolor=None, whitelistchars=None, blacklistchars=None, callbackfn=None, fps=30):
         """
         A pygcurse version of the input() and raw_input() functions. When called, it displays a cursor on the screen and lets the user type in a string. This function blocks until the user presses Enter, and it returns the string the user typed in.
-
         In fact, this function can be used as a drop-in replacement of Python's input() to convert a stdio text-based Python program to a graphical Pygcurse program. See the PygcurseWindow class for details.
-
         - prompt is a string that is displayed at the beginning of the input area
         - x and y are cell coordinates for where the beginning of the input area should be. By default it is where the cursor is.
         - maxlength is the maximum number of characters that the user can enter. By default it is 4094 characters if the keyboard input can span multiple lines, or to the end of the current row if the x value is specified.
@@ -267,31 +209,25 @@ class PygcurseSurface(object):
 
     raw_input = input
  
-    def pygprint(self, *objs): # PY2
+    def pygprint(self, *objs):
         """
         Displays text to the PygcurseSurface. The parameters work exactly the same as Python's textual print() function. It can take several arguments to display, each separated by the string in the sep parameter. The end parameter string is automatically added to the end of the displayed output.
-
         - fgcolor, bgcolor are colors for the text displayed by this call to print(). If None, then the PygcurseSurface object's fg and bg colors are used. These parameters only apply to the text printed by this function call, they do not change the PygcurseSurface's fg and bg color settings.
-
         This function can be used as a drop-in replacement of Python's print() to convert a stdio text-based Python program to a graphical Pygcurse program. See the PygcurseWindow class for details.
         """
         self.write(' '.join([str(x) for x in objs]) + '\n')
 
-
     def blitto(self, surfaceObj, dest=(0, 0)):
         """
         Copies this object's pygame.Surface to another surface object. (Usually, this surface object is the one returned by pygame.display.set_mode().)
-
         - surfaceObj is the pygame.Surface object to copy this PygcurseSurface's image to.
         - dest is a tuple of the xy pixel coordinates of the topleft corner where the image should be copied. By default, it is (0,0).
         """
         return surfaceObj.blit(self._surfaceobj, dest)
 
-
     def pushcursor(self):
         """Save the current cursor positions to a stack for them. This is useful when you need to modify the cursor position but want to restore it later."""
         self._cursorstack.append( (self._cursorx, self._cursory) )
-
 
     def popcursor(self):
         """Restore the cursor position from the cursor stack."""
@@ -426,7 +362,6 @@ class PygcurseSurface(object):
 
         return displayedfgcolor, displayedbgcolor
 
-
     def _repaintcell(self, x, y):
         """Immediately updates the cell at xy. Use this method when you don't want to update the entire surface."""
 
@@ -450,7 +385,6 @@ class PygcurseSurface(object):
                       (0,0,0): 'b',
                       (255, 255, 255): 'w'}
 
-
     def _debug(self, returnstr=False, fn=None):
         text = ['+' + ('-' * self._width) + '+\n']
         for y in range(self._height):
@@ -465,7 +399,6 @@ class PygcurseSurface(object):
         else:
             sys.stdout.write(''.join(text) + '\n')
 
-
     def _debugfgFn(self, x, y):
         r, g, b = self._screenfgcolor[x][y].r, self._screenfgcolor[x][y].g, self._screenfgcolor[x][y].b
         if (r, g, b) in PygcurseSurface._debugcolorkey:
@@ -473,10 +406,8 @@ class PygcurseSurface(object):
         else:
             return'.'
 
-
     def _debugfg(self, returnstr=False):
         return self._debug(returnstr=returnstr, fn=self._debugfgFn)
-
 
     def _debugbgFn(self, x, y):
         r, g, b = self._screenbgcolor[x][y].r, self._screenbgcolor[x][y].g, self._screenbgcolor[x][y].b
@@ -485,10 +416,8 @@ class PygcurseSurface(object):
         else:
             return '.'
 
-
     def _debugbg(self, returnstr=False):
         return self._debug(returnstr=returnstr, fn=self._debugbgFn)
-
 
     def _debugcharsFn(self, x, y):
         if self._screenchar[x][y] in (None, '\n', '\t'):
@@ -496,10 +425,8 @@ class PygcurseSurface(object):
         else:
             return self._screenchar[x][y]
 
-
     def _debugchars(self, returnstr=False):
         return self._debug(returnstr=returnstr, fn=self._debugcharsFn)
-
 
     def _debugdirtyFn(self, x, y):
         if self._screendirty[x][y]:
@@ -507,10 +434,8 @@ class PygcurseSurface(object):
         else:
             return '.'
 
-
     def _debugdirty(self, returnstr=False):
         return self._debug(returnstr=returnstr, fn=self._debugdirtyFn)
-
 
     def gettopleftpixel(self, cellx, celly=None, onscreen=True):
         """Return a tuple of the pixel coordinates of the cell at cellx, celly."""
@@ -522,20 +447,17 @@ class PygcurseSurface(object):
             return (None, None)
         return (cellx * self._cellwidth, celly * self._cellheight)
 
-
     def gettoppixel(self, celly, onscreen=True):
         """Return the y pixel coordinate of the cells at row celly."""
         if onscreen and (celly < 0 or celly >= self.height):
             return None
         return celly * self._cellheight
 
-
     def getleftpixel(self, cellx, onscreen=True):
         """Return the x pixel coordinate of the cells at column cellx."""
         if onscreen and (cellx < 0 or cellx >= self.width):
             return None
         return cellx * self._cellwidth
-
 
     def getcoordinatesatpixel(self, pixelx, pixely=None, onscreen=True):
         """
@@ -552,7 +474,6 @@ class PygcurseSurface(object):
             return (None, None)
         return int(pixelx / self._cellwidth), int(pixely / self._cellheight)
 
-
     def getcharatpixel(self, pixelx, pixely):
         """Returns the character in the cell located at the pixel coordinates pixelx, pixely."""
         x, y = self.getcoordinatesatpixel(pixelx, pixely)
@@ -560,12 +481,10 @@ class PygcurseSurface(object):
             return (None, None)
         return self._screenchar[x][y]
 
-
     def resize(self, newwidth=None, newheight=None, fgcolor=None, bgcolor=None):
         """
         Resize the number of cells wide and tall the surface is. If we are expanding the size of the surface, specify the foreground/background colors of the new cells.
         """
-
         # TODO - Yipes. This function changes so many things, a lot of testing needs to be done.
         # For example, what happens if the input cursor is now off the screen?
         if newwidth == self._width and newheight == self._height:
@@ -632,7 +551,6 @@ class PygcurseSurface(object):
         elif self._autoupdate:
             self.update()
 
-
     def setfgcolor(self, fgcolor, region=None):
         """
         Sets the foreground color of a region of cells on this surface.
@@ -653,7 +571,6 @@ class PygcurseSurface(object):
                 self._screendirty[ix][iy] = True
         if self._autoupdate:
             self.update()
-
 
     def setbgcolor(self, bgcolor, region=None):
         """
@@ -676,7 +593,6 @@ class PygcurseSurface(object):
         if self._autoupdate:
             self.update()
 
-
     def reversecolors(self, region=None):
         """
         Reverse the foreground/background colors of a region of cells on this surface with each other.
@@ -692,20 +608,17 @@ class PygcurseSurface(object):
         if self._autoupdate:
             self.update()
 
-
     def _invertfg(self, x, y):
         # NOTE - This function does not set the dirty flag.
         fgcolor = self._screenfgcolor[x][y]
         invR, invG, invB = 255 - fgcolor.r, 255 - fgcolor.g, 255 - fgcolor.b
         self._screenfgcolor[x][y] = pygame.Color(invR, invG, invB, fgcolor.a)
 
-
     def _invertbg(self, x, y):
         # NOTE - This function does not set the dirty flag.
         bgcolor = self._screenbgcolor[x][y]
         invR, invG, invB = 255 - bgcolor.r, 255 - bgcolor.g, 255 - bgcolor.b
         self._screenbgcolor[x][y] = pygame.Color(invR, invG, invB, bgcolor.a)
-
 
     def invertcolors(self, region=None):
         """
@@ -723,7 +636,6 @@ class PygcurseSurface(object):
         if self._autoupdate:
             self.update()
 
-
     def invertfgcolor(self, region=None):
         """
         Invert the foreground color of a region of cells on this surface. (For example, black and white are inverse of each other, as are blue and yellow.)
@@ -739,7 +651,6 @@ class PygcurseSurface(object):
         if self._autoupdate:
             self.update()
 
-
     def invertbgcolor(self, region=None):
         """
         Invert the background color of a region of cells on this surface. (For example, black and white are inverse of each other, as are blue and yellow.)
@@ -754,7 +665,6 @@ class PygcurseSurface(object):
                 self._screendirty[ix][iy] = True
         if self._autoupdate:
             self.update()
-
 
     def paste(self, srcregion=None, dstsurf=None, dstregion=None, pastechars=True, pastefgcolor=True, pastebgcolor=True, pasteredtint=True, pastegreentint=True, pastebluetint=True):
         srcx, srcy, srcwidth, srcheight = self.getregion(srcregion)
@@ -802,38 +712,30 @@ class PygcurseSurface(object):
         if dstsurf._autoupdate:
             dstsurf.update()
 
-
     def pastechars(self, srcregion=None, dstsurf=None, dstregion=None):
         return self.paste(srcregion, dstsurf, dstregion, True, False, False, False, False, False)
-
 
     def pastecolor(self, srcregion=None, dstsurf=None, dstregion=None, pastefgcolor=True, pastebgcolor=True):
         return self.paste(srcregion, dstsurf, dstregion, False, pastefgcolor, pastebgcolor, False, False, False)
 
-
     def pastetint(self, srcregion=None, dstsurf=None, dstregion=None, pasteredtint=True, pastegreentint=True, pastebluetint=True):
         return self.paste(srcregion, dstsurf, dstregion, False, False, False, pasteredtint, pastegreentint, pastebluetint)
-
 
     def lighten(self, amount=51, region=None):
         """
         Adds a highlighting tint to the region specified.
-
         - amount is the amount to lighten by. When the lightening is at 255, the cell will be completely white. A negative amount argument has the same effect as calling darken().
         """
 
         # NOTE - I chose 51 for the default amount because 51 is a fifth of 255.
         self.tint(amount, amount, amount, region)
 
-
     def darken(self, amount=51, region=None):
         """
         Adds a darkening tint to the region specified.
-
         - amount is the amount to darken by. When the lightening is at -255, the cell will be completely black. A negative amount argument has the same effect as calling lighten().
         """
         self.tint(-amount, -amount, -amount, region)
-
 
     def addshadow(self, amount=51, region=None, offset=None, direction=None, xoffset=1, yoffset=1):
         """
@@ -924,11 +826,9 @@ class PygcurseSurface(object):
                                  getwithinrange(abs(xoffset), 0, width),
                                  getwithinrange(abs(yoffset), 0, height)))
 
-
     def tint(self, r=0, g=0, b=0, region=None):
         """
         Adjust the red, green, and blue tint of the cells in the specified region.
-
         - r, g, b are the amount of tint to add/subtract. A positive integer adds tint, negative removes it. At 255, there is maximum tint of that color. At -255 there will never be any amount of that color in the cell.
         """
         x, y, width, height = self.getregion(region)
@@ -951,7 +851,6 @@ class PygcurseSurface(object):
         - amount is the amount of brightness. 0 means a neutral amount, and the cells will be displayed as their true colors. 255 is maximum brightness, which turns all cells completely white, and -255 is maximum darkness, turning all cells completely black.
         """
         self.settint(amount, amount, amount, region)
-
 
     def settint(self, r=0, g=0, b=0, region=None):
         """
@@ -977,11 +876,9 @@ class PygcurseSurface(object):
             return None
         return self._screenchar[x][y]
 
-
     def getchars(self, region=None, gapChar=' '):
         """
         Returns the a list of the characters in the specified region. Each item in the list is a string of the rows of characters.
-
         - gapChar is used whenever None is found as a cell. By default this is set to a space character. If gapChar is set to None, then the None characters in cells will be ignored (this could cause alignment issues in between the lines.)
         """
         x, y, width, height = self.getregion(region)
@@ -998,7 +895,6 @@ class PygcurseSurface(object):
                     line.append(self._screenchar[ix][iy])
             lines.append(''.join(line))
         return lines
-
 
     def putchar(self, char, x=None, y=None, fgcolor=None, bgcolor=None):
         """
@@ -1030,7 +926,6 @@ class PygcurseSurface(object):
             self.update()
 
         return char
-
 
     def putchars(self, chars, x=None, y=None, fgcolor=None, bgcolor=None, indent=False, update=False):
         # doc - does not modify the cursor. That's how putchars is different from print() or write()
@@ -1072,11 +967,9 @@ class PygcurseSurface(object):
         if self._autoupdate or update:
             self.update()
 
-
     def setscreencolors(self, fgcolor=None, bgcolor=None, clear=False):
         """
         Sets the foreground and/or background color of the entire screen to the ones specified in the fgcolor and bgcolor parameters. Also sets the PygcurseSurface's default foreground and/or background colors. The brightness of all cells is reset back to 0. This is a good "clear screen" function to use.
-
         fgcolor - foreground color. If None, then the foreground color isn't changed.
         bgcolor - background color. If None, then the background color isn't changed.
         clear - If set to True, then all the characters on the surface will be erased so that the screen is just a solid fill of the background color. This parameter is False by default.
@@ -1089,14 +982,11 @@ class PygcurseSurface(object):
         self.fill(char, fgcolor, bgcolor)
         self.setbrightness()
 
-
     def erase(self, region=None):
         self.fill(None, None, None, region)
 
-
     def paint(self, x, y, bgcolor=None):
         self.putchar(' ', x, y, None, bgcolor)
-
 
     def fill(self, char=' ', fgcolor=None, bgcolor=None, region=None):
         x, y, width, height = self.getregion(region)
@@ -1119,7 +1009,6 @@ class PygcurseSurface(object):
         if self._autoupdate:
             self.update()
 
-
     def _scroll(self):
         """Scroll the content of the entire screen up one row. This is done when characters are printed to the screen that go past the end of the last row."""
         for x in range(self._width):
@@ -1138,7 +1027,6 @@ class PygcurseSurface(object):
             self._screenBdelta[x][self._height-1] = self._bdelta
         self._screendirty = [[True] * self._height for i in range(self._width)]
         self._scrollcount += 1
-
 
     def getregion(self, region=None, truncate=True):
         if region is None:
@@ -1177,11 +1065,9 @@ class PygcurseSurface(object):
 
         return x, y, width, height
 
-
     def isonscreen(self, x, y):
         """Returns True if the given xy cell coordinates are on the PygcurseSurface object, otherwise False."""
         return x >= 0 and y >= 0 and x < self.width and y < self.height
-
 
     def writekeyevent(self, keyevent, x=None, y=None, fgcolor=None, bgcolor=None):
         """
@@ -1198,7 +1084,6 @@ class PygcurseSurface(object):
         if char is not None:
             self.putchar(char, x=x, y=y, fgcolor=fgcolor, bgcolor=bgcolor)
 
-
     # File-like Object methods:
     def write(self, text, x=None, y=None, fgcolor=None, bgcolor=None):
         if x is not None:
@@ -1210,7 +1095,6 @@ class PygcurseSurface(object):
         bgcolor = (bgcolor is None) and (self._bgcolor) or (getpygamecolor(bgcolor))
 
         # TODO - we can calculate in advance what how many scrolls to do.
-
 
         # replace tabs with appropriate number of spaces
         i = 0
@@ -1284,15 +1168,12 @@ class PygcurseSurface(object):
         if self._autoupdate:
             self.update()
 
-
     def read(self): # TODO - this isn't right.
         return '\n'.join(self.getchars())
-
 
     # Properties:
     def _propgetcursorx(self):
         return self._cursorx
-
 
     def _propsetcursorx(self, value):
         x = int(value)
@@ -1304,10 +1185,8 @@ class PygcurseSurface(object):
 
         self._cursorx = x
 
-
     def _propgetcursory(self):
         return self._cursory
-
 
     def _propsetcursory(self, value):
         y = int(value)
@@ -1319,10 +1198,8 @@ class PygcurseSurface(object):
 
         self._cursory = y
 
-
     def _propgetcursor(self):
         return (self._cursorx, self._cursory)
-
 
     def _propsetcursor(self, value):
         x = int(value[0])
@@ -1332,10 +1209,8 @@ class PygcurseSurface(object):
         self._cursorx = x
         self._cursory = y
 
-
     def _propgetinputcursor(self):
         return (self._inputcursorx, self._inputcursory)
-
 
     def _propsetinputcursor(self, value):
         x = int(value[0])
@@ -1347,10 +1222,8 @@ class PygcurseSurface(object):
         self._inputcursorx = x
         self._inputcursory = y
 
-
     def _propgetinputcursormode(self):
         return self._inputcursormode
-
 
     def _propsetinputcursormode(self, value):
         if value in (None, 'underline', 'insert', 'box'):
@@ -1362,10 +1235,8 @@ class PygcurseSurface(object):
         else:
             self._inputcursormode = None
 
-
     def _propgetfont(self):
         return self._font
-
 
     def _propsetfont(self, value):
         self._font = value # TODO - a lot of this code is copy/paste
