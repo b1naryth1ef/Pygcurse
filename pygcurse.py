@@ -144,7 +144,7 @@ class PygcurseSurface(object):
         # the width and height in pixels of each cell depends on the font used.
         self._cellwidth, self._cellheight = calcfontsize(self._font) # width and height of each cell in pixels
 
-        self._autoupdate = True
+        self._autoupdate = False #Set false by default
         if windowsurface == _NEW_WINDOW:
             self._windowsurface = pygame.display.set_mode((self._cellwidth * width, self._cellheight * height))
             self._managesdisplay = True
